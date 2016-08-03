@@ -2,13 +2,12 @@
 Sample code for ScanAPI SDK
 
 ## Prerequisite
-This application requires ScanAPI SDK and a Bluetooth INBOUND port 
-(COM3 preferably).
+This application requires ScanAPI SDK and a Bluetooth INBOUND port.
 
 ## Installation
 ScanAPI is now available as a "private" NuGet.
 
-Copy SocketMobile.ScanAPI.10.2.xxx.x.nupkg NuGet file to a location of your 
+Copy SocketMobile.ScanAPI.10.3.xxx.x.nupkg NuGet file to a location of your 
 choice. 
 
 In Visual Studio, launch the NuGet Package Manager and add a new source, with 
