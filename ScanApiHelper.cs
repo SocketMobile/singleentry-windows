@@ -17,6 +17,7 @@
  * limitations under the License.
  *
  *
+ *
  * Description:
  * this class provides a set of common functions to retrieve
  * or configure a scanner or ScanAPI and to receive decoded
@@ -247,9 +248,15 @@ namespace ScanApiHelper
                 else if (_type == SktScanDeviceType.kSktScanDeviceTypeScanner9)
                     type = "CRS Scanner";
                 else if (_type == SktScanDeviceType.kSktScanDeviceTypeScanner8ci)
-                    type = "CHS 8Ci Scanner";
+                    type = "SocketScan S800 Scanner";
                 else if (_type == SktScanDeviceType.kSktScanDeviceTypeScanner8qi)
-                    type = "CHS 8Qi Scanner";
+                    type = "SocketScan S800 Scanner";
+                else if (_type == SktScanDeviceType.kSktScanDeviceTypeScannerD700)
+                    type = "DuraScan D700 Scanner";
+                else if (_type == SktScanDeviceType.kSktScanDeviceTypeScannerD730)
+                    type = "DuraScan D730 Scanner";
+                else if (_type == SktScanDeviceType.kSktScanDeviceTypeScannerD750)
+                    type = "DuraScan D750 Scanner";
                 else
                     type = "Unknown scanner type!";
                 return type;

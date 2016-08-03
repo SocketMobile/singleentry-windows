@@ -13,8 +13,6 @@
 // limitations under the License.
 //
 using System;
-using System.Globalization;
-using System.IO;
 using System.Windows.Forms;
 using ScanAPI;
 using ScanApiHelper;
