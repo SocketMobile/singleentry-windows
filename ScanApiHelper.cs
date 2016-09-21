@@ -17,7 +17,6 @@
  * limitations under the License.
  *
  *
- *
  * Description:
  * this class provides a set of common functions to retrieve
  * or configure a scanner or ScanAPI and to receive decoded
@@ -250,13 +249,13 @@ namespace ScanApiHelper
                 else if (_type == SktScanDeviceType.kSktScanDeviceTypeScanner8ci)
                     type = "SocketScan S800 Scanner";
                 else if (_type == SktScanDeviceType.kSktScanDeviceTypeScanner8qi)
-                    type = "SocketScan S800 Scanner";
-                else if (_type == SktScanDeviceType.kSktScanDeviceTypeScannerD700)
-                    type = "DuraScan D700 Scanner";
-                else if (_type == SktScanDeviceType.kSktScanDeviceTypeScannerD730)
-                    type = "DuraScan D730 Scanner";
+                    type = "SocketScan S850 Scanner";
                 else if (_type == SktScanDeviceType.kSktScanDeviceTypeScannerD750)
-                    type = "DuraScan D750 Scanner";
+                    type = "DuraScan D750";
+                else if (_type == SktScanDeviceType.kSktScanDeviceTypeScannerD730)
+                    type = "DuraScan D730";
+                else if (_type == SktScanDeviceType.kSktScanDeviceTypeScannerD700)
+                    type = "DuraScan D700";
                 else
                     type = "Unknown scanner type!";
                 return type;
@@ -454,9 +453,6 @@ namespace ScanApiHelper
         private readonly List<DeviceInfo> _devicesList;
         private readonly DeviceInfo _noDeviceConnected;
 
-        // This never changes now, but could/should be changable
-        private byte _dataConfirmationMode = ISktScanProperty.values.confirmationMode.kSktScanDataConfirmationModeDevice;
-
         public ScanApiHelper()
         {
             _commandContexts = new List<CommandContext>();
@@ -636,13 +632,32 @@ namespace ScanApiHelper
             CommandContext command = new CommandContext(false, newScanObj, _scanApi, null, callback);
             AddCommand(command);
         }
+        /**
+         * PostSetLocalAcknowledgement
+         * Set the scanner LocalAcknowledgement<p>
+         * This is only required if the scanner Confirmation Mode is set to kSktScanDataConfirmationModeApp 
+         * or kSktScanDataConfirmationModeScanAPI
+         */
+        public void PostSetLocalAcknowledgement(DeviceInfo deviceInfo, bool bLocalAcknowledgement, ICommandContextCallback callback)
+        {
+
+            ISktScanDevice device = deviceInfo.SktScanDevice;
+            ISktScanObject newScanObj = SktClassFactory.createScanObject();
+            newScanObj.Property.ID = ISktScanProperty.propId.kSktScanPropIdLocalAcknowledgmentDevice;
+            newScanObj.Property.Type = ISktScanProperty.types.kSktScanPropTypeByte;
+            newScanObj.Property.Byte = bLocalAcknowledgement ? ScanAPI.ISktScanProperty.values.deviceDataAcknowledgment.kSktScanDeviceDataAcknowledgmentOn : ScanAPI.ISktScanProperty.values.deviceDataAcknowledgment.kSktScanDeviceDataAcknowledgmentOff;
+            CommandContext command = new CommandContext(false, newScanObj, device, null, callback);
+            AddCommand(command);
+        }
+
+
 
         /**
          * PostSetDataConfirmation
          * acknowledge the decoded data<p>
          * This is only required if the scanner Confirmation Mode is set to kSktScanDataConfirmationModeApp
          */
-        public void PostSetDataConfirmation(DeviceInfo deviceInfo, ICommandContextCallback callback)
+        public void PostSetDataConfirmation(DeviceInfo deviceInfo, bool bGoodScan, ICommandContextCallback callback)
         {
 
             ISktScanDevice device = deviceInfo.SktScanDevice;
@@ -650,11 +665,18 @@ namespace ScanApiHelper
             newScanObj.Property.ID=ISktScanProperty.propId.kSktScanPropIdDataConfirmationDevice;
             newScanObj.Property.Type=ISktScanProperty.types.kSktScanPropTypeUlong;
             newScanObj.Property.Ulong=
+                    bGoodScan ? 
                     SktScan.helper.SKTDATACONFIRMATION(
                             0,
                             ISktScanProperty.values.dataConfirmation.kSktScanDataConfirmationRumbleNone,
                             ISktScanProperty.values.dataConfirmation.kSktScanDataConfirmationBeepGood,
-                            ISktScanProperty.values.dataConfirmation.kSktScanDataConfirmationLedGreen);
+                            ISktScanProperty.values.dataConfirmation.kSktScanDataConfirmationLedGreen)
+                            :
+                    SktScan.helper.SKTDATACONFIRMATION(
+                            0,
+                            ISktScanProperty.values.dataConfirmation.kSktScanDataConfirmationRumbleNone,
+                            ISktScanProperty.values.dataConfirmation.kSktScanDataConfirmationBeepBad,
+                            ISktScanProperty.values.dataConfirmation.kSktScanDataConfirmationLedRed);
 
 
             CommandContext command = new CommandContext(false, newScanObj, device, null, callback);
@@ -1239,15 +1261,6 @@ namespace ScanApiHelper
 			    DeviceInfo deviceInfo=GetDeviceInfo(iDevice);
 			    if(_notification!=null){
 				    _notification.OnDecodedData(deviceInfo,decodedData);
-			    }
-
-			    // if the Data Confirmation mode is set to App
-			    // then confirm Data here
-			    if(_dataConfirmationMode==
-				    ISktScanProperty.values.confirmationMode.kSktScanDataConfirmationModeApp)
-			    {
-				    PostSetDataConfirmation(deviceInfo,null);
-    				
 			    }
 			    break;
 		    case ISktScanEvent.id.kSktScanEventPower:
