@@ -1,4 +1,7 @@
-﻿// Copyright 2015 Socket Mobile, Inc.
+﻿//#define HOSTACK
+// Turn on this to see how the host ackowledgement works.
+//
+// Copyright 2016 Socket Mobile, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +19,9 @@ using System;
 using System.Windows.Forms;
 using ScanAPI;
 using ScanApiHelper;
+#if HOSTACK
+using System.Threading;
+#endif
 
 
 namespace SingleEntry
@@ -25,17 +31,30 @@ namespace SingleEntry
         private const string strAppName = "SingleEntry";
         private const int SCANAPI_TIMER_PERIOD = 100;		// milliseconds
         private readonly ScanApiHelper.ScanApiHelper _scanApiHelper;
-        private DeviceInfo _device;
+        private DeviceInfo _device = null;
         // for the Scan Test window to receive the decoded data
         public delegate void DecodedDataOutputDelegate(string strDecodedData);
         public delegate void StandardTextOutputDelegate(string strStatus);
 
+        // This is for the Host Acknowledgment feature. These lines can
+        // be safely removed from your application if this feature is not needed
+#if HOSTACK
+		private bool bDoGoodScan = true;	// used to alternate between a 'good' ack and a 'bad' ack for demo
+#endif				
         public SingleEntry()
         {
             InitializeComponent();
             lblStatus.Text = "Initializing...";
             _scanApiHelper = new ScanApiHelper.ScanApiHelper();
             _scanApiHelper.SetNotification(this);
+// This is for the Host Acknowledgment feature. These lines can
+// be safely removed from #if to the #endif from your application 
+// if this feature is not needed
+#if HOSTACK
+            _scanApiHelper.PostSetConfirmationMode((char)ScanAPI.ISktScanProperty.values.confirmationMode.kSktScanDataConfirmationModeApp, null);
+#else
+            _scanApiHelper.PostSetConfirmationMode((char)ScanAPI.ISktScanProperty.values.confirmationMode.kSktScanDataConfirmationModeDevice, null);
+#endif
         }
 
         private void SingleEntry_Load(object sender, EventArgs e)
@@ -45,7 +64,7 @@ namespace SingleEntry
             timerScanners.Interval = SCANAPI_TIMER_PERIOD;
             timerScanners.Start();
         }
-	
+
         // if ScanAPI is fully initialized then we can
         // receive ScanObject from ScanAPI.
         private void timerScanners_Tick_1(object sender, EventArgs e)
@@ -64,6 +83,23 @@ namespace SingleEntry
             {
                 UpdateStatusText("New Scanner: " + newDevice.Name);
                 _device = newDevice;
+// This is for the Host Acknowledgment feature. These lines can
+// be safely removed from #if to the #endif from your application 
+// if this feature is not needed
+#if HOSTACK
+                // Set the device to NOT acknowledge itself
+                _scanApiHelper.PostSetLocalAcknowledgement(_device, false, null);
+                // And make sure it does not give any indication after a scan
+                _scanApiHelper.PostSetDecodeAction(_device, ISktScanProperty.values.localDecodeAction.kSktScanLocalDecodeActionNone, null);
+#else
+                // Set the device to NOT acknowledge itself
+                _scanApiHelper.PostSetLocalAcknowledgement(_device, true, null);
+                // And make sure it does not give any indication after a scan
+                int decode = ISktScanProperty.values.localDecodeAction.kSktScanLocalDecodeActionBeep |
+                    ISktScanProperty.values.localDecodeAction.kSktScanLocalDecodeActionFlash |
+                    ISktScanProperty.values.localDecodeAction.kSktScanLocalDecodeActionRumble;
+                _scanApiHelper.PostSetDecodeAction(_device, decode, null);
+#endif
             }
             else
             {
@@ -91,6 +127,15 @@ namespace SingleEntry
         public void OnDecodedData(ScanApiHelper.DeviceInfo device, ISktScanDecodedData decodedData)
         {
             UpdateDecodedDataText(decodedData.DataToUTF8String);
+// This is for the Host Acknowledgment feature. These lines can
+// be safely removed from #if to the #endif from your application 
+// if this feature is not needed
+#if HOSTACK
+            Thread.Sleep(3 * 1000); // just a delay to show the trigger lock...
+			// Send confirmation to scanner, good or bad
+            _scanApiHelper.PostSetDataConfirmation(_device, bDoGoodScan, null);
+            bDoGoodScan = !bDoGoodScan; // Alternate between a good read and a bad read..
+#endif
         }
 
         // ScanAPI is now initialized and fully functional
@@ -132,5 +177,6 @@ namespace SingleEntry
         }
 
         #endregion
+
     }
 }
