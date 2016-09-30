@@ -1,7 +1,7 @@
 ﻿/*
  * Title:
  * ScanAPIHelper.cs
- * 
+ *
  * Copyright 2015 Socket Mobile, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,34 +17,35 @@
  * limitations under the License.
  *
  *
+ *
  * Description:
  * this class provides a set of common functions to retrieve
  * or configure a scanner or ScanAPI and to receive decoded
  * data from a scanner.<p>
  * This helper manages a commands list so the application
  * can send multiple command in a row, the helper will send
- * them one at a time. Each command has an optional callback 
+ * them one at a time. Each command has an optional callback
  * function that will be called each time a command complete.
- * By example, to get a device friendly name, use the 
- * PostGetFriendlyName method and pass a callback function in 
- * which you can update the UI with the newly fetched friendly 
+ * By example, to get a device friendly name, use the
+ * PostGetFriendlyName method and pass a callback function in
+ * which you can update the UI with the newly fetched friendly
  * name. This operation will be completely asynchronous.<p>
- * ScanAPI Helper manages a list of device information. Most of 
+ * ScanAPI Helper manages a list of device information. Most of
  * the time only one device is connected to the host. This list
- * could be configured to have always one item, that will be a 
+ * could be configured to have always one item, that will be a
  * "No device connected" item in the case where there is no device
  * connected, or simply a device name when there is one device
  * connected. Use isDeviceConnected method to know if there is at
- * least one device connected to the host.<br> 
+ * least one device connected to the host.<br>
  * Common usage scenario of ScanAPIHelper:<br>
  * <li> create an instance of ScanApiHelper: _scanApi=new ScanApiHelper();
- * <li> [optional] if a UI device list is used a no device connected 
+ * <li> [optional] if a UI device list is used a no device connected
  * string can be specified:_scanApi.setNoDeviceText(getString(R.string.no_device_connected));
  * <li> register for notification: _scanApi.setNotification(_scanApiNotification);
  * <li> derive from ScanApiHelperNotification to handle the notifications coming
  * from ScanAPI including "Device Arrival", "Device Removal", "Decoded Data" etc...
  * <li> open ScanAPI to start using it:_scanApi.open();
- * <li> check the ScanAPI initialization result in the notifications: 
+ * <li> check the ScanAPI initialization result in the notifications:
  * _scanApiNotification.onScanApiInitializeComplete(long result){}
  * <li> monitor a scanner connection by using the notifications:
  * _scanApiNotification.onDeviceArrival(long result,DeviceInfo newDevice){}
@@ -93,13 +94,13 @@ namespace ScanApiHelper
     }
 
     public delegate void ICommandContextCallback(long result,ISktScanObject scanObj);
-    
+
     class CommandContext
     {
 	    public const int statusReady=1;
 	    public const int statusNotCompleted=2;
 	    public const int statusCompleted=3;
-    	
+
 	    private readonly ICommandContextCallback _callback;
 	    private readonly bool _getOperation;
 	    private readonly ISktScanObject _scanObj;
@@ -119,17 +120,17 @@ namespace ScanApiHelper
 		    this._deviceInfo=deviceInfo;
 		    this.SymbologyId=0;
 	    }
-    	
+
 	    public bool Operation
         {
             get { return _getOperation; }
 	    }
-    	
+
 	    public ISktScanObject ScanObject
         {
 		    get {return _scanObj;}
 	    }
-    	
+
 	    public int Status
         {
             get { return _status; }
@@ -165,7 +166,7 @@ namespace ScanApiHelper
 		    long result=SktScanErrors.ESKT_NOERROR;
 		    if(ScanDevice==null)
 			    result=SktScanErrors.ESKT_INVALIDPARAMETER;
-    		
+
 		    if(SktScanErrors.SKTSUCCESS(result)){
 			    if(Operation){
 				    Debug.MSG(Debug.kLevelTrace,"About to do a get for ID:0x"+Convert.ToString(ScanObject.Property.ID,16));
@@ -184,7 +185,7 @@ namespace ScanApiHelper
 	    }
 
     }
-    
+
     public class SymbologyInfo
     {
         public String Name { get; set; }
@@ -196,7 +197,7 @@ namespace ScanApiHelper
         }
     }
 
-    public class DeviceInfo
+    public partial class DeviceInfo
     {
         public interface Notification
         {
@@ -220,7 +221,7 @@ namespace ScanApiHelper
             get { return _name; }
             set { _name = value; }
         }
-        
+
         public String BdAddress
         {
             get { return _bdAddress; }
@@ -234,7 +235,7 @@ namespace ScanApiHelper
 
         public String Type
         {
-            get 
+            get
             {
                 String type;
                 // Note this can't be a switch as the kSktScanDeviceTypesScanner's are actually functions
@@ -250,12 +251,12 @@ namespace ScanApiHelper
                     type = "SocketScan S800 Scanner";
                 else if (_type == SktScanDeviceType.kSktScanDeviceTypeScanner8qi)
                     type = "SocketScan S850 Scanner";
-                else if (_type == SktScanDeviceType.kSktScanDeviceTypeScannerD750)
-                    type = "DuraScan D750";
-                else if (_type == SktScanDeviceType.kSktScanDeviceTypeScannerD730)
-                    type = "DuraScan D730";
                 else if (_type == SktScanDeviceType.kSktScanDeviceTypeScannerD700)
-                    type = "DuraScan D700";
+                    type = "DuraScan D700 Scanner";
+                else if (_type == SktScanDeviceType.kSktScanDeviceTypeScannerD730)
+                    type = "DuraScan D730 Scanner";
+                else if (_type == SktScanDeviceType.kSktScanDeviceTypeScannerD750)
+                    type = "DuraScan D750 Scanner";
                 else
                     type = "Unknown scanner type!";
                 return type;
@@ -355,28 +356,28 @@ namespace ScanApiHelper
      * data from a scanner.<p>
      * This helper manages a commands list so the application
      * can send multiple command in a row, the helper will send
-     * them one at a time. Each command has an optional callback 
+     * them one at a time. Each command has an optional callback
      * function that will be called each time a command complete.
-     * By example, to get a device friendly name, use the 
-     * PostGetFriendlyName method and pass a callback function in 
-     * which you can update the UI with the newly fetched friendly 
+     * By example, to get a device friendly name, use the
+     * PostGetFriendlyName method and pass a callback function in
+     * which you can update the UI with the newly fetched friendly
      * name. This operation will be completely asynchronous.<p>
-     * ScanAPI Helper manages a list of device information. Most of 
+     * ScanAPI Helper manages a list of device information. Most of
      * the time only one device is connected to the host. This list
-     * could be configured to have always one item, that will be a 
+     * could be configured to have always one item, that will be a
      * "No device connected" item in the case where there is no device
      * connected, or simply a device name when there is one device
      * connected. Use isDeviceConnected method to know if there is at
-     * least one device connected to the host.<br> 
+     * least one device connected to the host.<br>
      * Common usage scenario of ScanAPIHelper:<br>
      * <li> create an instance of ScanApiHelper: _scanApi=new ScanApiHelper();
-     * <li> [optional] if a UI device list is used a no device connected 
+     * <li> [optional] if a UI device list is used a no device connected
      * string can be specified:_scanApi.setNoDeviceText(getString(R.string.no_device_connected));
      * <li> register for notification: _scanApi.setNotification(_scanApiNotification);
      * <li> derive from ScanApiHelperNotification to handle the notifications coming
      * from ScanAPI including "Device Arrival", "Device Removal", "Decoded Data" etc...
      * <li> open ScanAPI to start using it:_scanApi.open();
-     * <li> check the ScanAPI initialization result in the notifications: 
+     * <li> check the ScanAPI initialization result in the notifications:
      * _scanApiNotification.onScanApiInitializeComplete(long result){}
      * <li> monitor a scanner connection by using the notifications:
      * _scanApiNotification.onDeviceArrival(long result,DeviceInfo newDevice){}
@@ -388,7 +389,7 @@ namespace ScanApiHelper
      * @author ericg
      *
      */
-    class ScanApiHelper
+    public partial class ScanApiHelper
     {
         /**
          * notification coming from ScanApiHelper the application
@@ -475,7 +476,7 @@ namespace ScanApiHelper
 
         /**
          * specifying a name to display when no device is connected
-         * will add a no device connected item in the list with 
+         * will add a no device connected item in the list with
          * the name specified, otherwise if there is no device connected
          * the list will be empty.
          */
@@ -488,7 +489,7 @@ namespace ScanApiHelper
          * get the list of devices. If there is no device
          * connected and a text has been specified for
          * when there is no device then the list will
-         * contain one item which is the no device in the 
+         * contain one item which is the no device in the
          * list
          * @return
          */
@@ -632,10 +633,11 @@ namespace ScanApiHelper
             CommandContext command = new CommandContext(false, newScanObj, _scanApi, null, callback);
             AddCommand(command);
         }
+
         /**
          * PostSetLocalAcknowledgement
          * Set the scanner LocalAcknowledgement<p>
-         * This is only required if the scanner Confirmation Mode is set to kSktScanDataConfirmationModeApp 
+         * This is only required if the scanner Confirmation Mode is set to kSktScanDataConfirmationModeApp
          * or kSktScanDataConfirmationModeScanAPI
          */
         public void PostSetLocalAcknowledgement(DeviceInfo deviceInfo, bool bLocalAcknowledgement, ICommandContextCallback callback)
@@ -646,11 +648,26 @@ namespace ScanApiHelper
             newScanObj.Property.ID = ISktScanProperty.propId.kSktScanPropIdLocalAcknowledgmentDevice;
             newScanObj.Property.Type = ISktScanProperty.types.kSktScanPropTypeByte;
             newScanObj.Property.Byte = bLocalAcknowledgement ? ScanAPI.ISktScanProperty.values.deviceDataAcknowledgment.kSktScanDeviceDataAcknowledgmentOn : ScanAPI.ISktScanProperty.values.deviceDataAcknowledgment.kSktScanDeviceDataAcknowledgmentOff;
-            CommandContext command = new CommandContext(false, newScanObj, device, null, callback);
+            CommandContext command = new CommandContext(false, newScanObj, device, deviceInfo, callback);
             AddCommand(command);
         }
 
+        /**
+         * PostGetLocalAcknowledgement
+         * Get the scanner LocalAcknowledgement<p>
+         * This is only required if the scanner Confirmation Mode is set to kSktScanDataConfirmationModeApp
+         * or kSktScanDataConfirmationModeScanAPI
+         */
+        public void PostGetLocalAcknowledgement(DeviceInfo deviceInfo, ICommandContextCallback callback)
+        {
 
+            ISktScanDevice device = deviceInfo.SktScanDevice;
+            ISktScanObject newScanObj = SktClassFactory.createScanObject();
+            newScanObj.Property.ID = ISktScanProperty.propId.kSktScanPropIdLocalAcknowledgmentDevice;
+            newScanObj.Property.Type = ISktScanProperty.types.kSktScanPropTypeNone;
+            CommandContext command = new CommandContext(true, newScanObj, device, deviceInfo, callback);
+            AddCommand(command);
+        }
 
         /**
          * PostSetDataConfirmation
@@ -665,19 +682,18 @@ namespace ScanApiHelper
             newScanObj.Property.ID=ISktScanProperty.propId.kSktScanPropIdDataConfirmationDevice;
             newScanObj.Property.Type=ISktScanProperty.types.kSktScanPropTypeUlong;
             newScanObj.Property.Ulong=
-                    bGoodScan ? 
+                    bGoodScan ?
                     SktScan.helper.SKTDATACONFIRMATION(
                             0,
                             ISktScanProperty.values.dataConfirmation.kSktScanDataConfirmationRumbleNone,
                             ISktScanProperty.values.dataConfirmation.kSktScanDataConfirmationBeepGood,
                             ISktScanProperty.values.dataConfirmation.kSktScanDataConfirmationLedGreen)
-                            :
+                    :
                     SktScan.helper.SKTDATACONFIRMATION(
                             0,
                             ISktScanProperty.values.dataConfirmation.kSktScanDataConfirmationRumbleNone,
                             ISktScanProperty.values.dataConfirmation.kSktScanDataConfirmationBeepBad,
                             ISktScanProperty.values.dataConfirmation.kSktScanDataConfirmationLedRed);
-
 
             CommandContext command = new CommandContext(false, newScanObj, device, null, callback);
             lock (_commandContexts)
@@ -813,10 +829,10 @@ namespace ScanApiHelper
 
         /**
          * PostGetDecodeAction
-         * 
+         *
          * Creates a TSktScanObject and initializes it to perform a request for the
          * Decode Action in the scanner.
-         * 
+         *
          */
         public void PostGetDecodeAction(DeviceInfo deviceInfo, ICommandContextCallback callback)
         {
@@ -835,7 +851,7 @@ namespace ScanApiHelper
 
         /**
          * DoGetCapabilitiesDevice
-         * 
+         *
          * Creates a TSktScanObject and initializes it to perform a request for the
          * Capabilities Device in the scanner.
          */
@@ -857,10 +873,10 @@ namespace ScanApiHelper
 
         /**
          * DoGetPostambleDevice
-         * 
+         *
          * Creates a TSktScanObject and initializes it to perform a request for the
          * Postamble Device in the scanner.
-         * 
+         *
          */
         public void PostGetPostambleDevice(DeviceInfo deviceInfo, ICommandContextCallback callback)
         {
@@ -878,10 +894,10 @@ namespace ScanApiHelper
 
         /**
          * PostGetSymbologyInfo
-         * 
+         *
          * Creates a TSktScanObject and initializes it to perform a request for the
          * Symbology Info in the scanner.
-         * 
+         *
          */
         public void PostGetSymbologyInfo(DeviceInfo deviceInfo, int symbologyId, ICommandContextCallback callback)
         {
@@ -900,10 +916,10 @@ namespace ScanApiHelper
 
         /**
          * PostGetAllSymbologyInfo
-         * 
+         *
          * Post a series of get Symbology info in order to retrieve all the
          * Symbology Info of the scanner.
-         * The callback would be called each time a Get Symbology request has completed 
+         * The callback would be called each time a Get Symbology request has completed
          */
         public void PostGetAllSymbologyInfo(DeviceInfo deviceInfo, ICommandContextCallback callback)
         {
@@ -927,7 +943,7 @@ namespace ScanApiHelper
         /**
          * PostSetSymbologyInfo
          * Constructs a request object for setting the Symbology Info in the scanner
-         * 
+         *
          */
         public void PostSetSymbologyInfo(DeviceInfo deviceInfo, int Symbology, bool Status, ICommandContextCallback callback)
         {
@@ -949,10 +965,10 @@ namespace ScanApiHelper
 
         /**
          * PostGetFriendlyName
-         * 
+         *
          * Creates a TSktScanObject and initializes it to perform a request for the
          * friendly name in the scanner.
-         * 
+         *
          */
 
         public void PostGetFriendlyName(DeviceInfo deviceInfo, ICommandContextCallback callback)
@@ -968,10 +984,10 @@ namespace ScanApiHelper
             AddCommand(command);
         }
 
-        /** 
+        /**
          * PostSetFriendlyName
          * Constructs a request object for setting the Friendly Name in the scanner
-         * 
+         *
          */
         public void PostSetFriendlyName(DeviceInfo deviceInfo, String friendlyName, ICommandContextCallback callback)
         {
@@ -984,10 +1000,10 @@ namespace ScanApiHelper
             AddCommand(command);
         }
 
-        /** 
+        /**
          * PostSetStandConfig
          * Constructs a request object for setting the Stand Config of the scanner
-         * 
+         *
          */
         public void PostSetStandConfig(DeviceInfo deviceInfo, int standConfig, ICommandContextCallback callback)
         {
@@ -1001,9 +1017,9 @@ namespace ScanApiHelper
         }
         /**
          * PostGetDeviceSpecific
-         * 
+         *
          * Send a device specific Get operation
-         * 
+         *
          * @param device
          * @param bArray - byte array for a specific scanner type
          */
@@ -1020,9 +1036,9 @@ namespace ScanApiHelper
 
         /**
          * PostSetDecodeAction
-         * 
+         *
          * Configure the local decode action of the device
-         * 
+         *
          * @param device
          * @param decodeVal
          */
@@ -1046,11 +1062,11 @@ namespace ScanApiHelper
 
             CommandContext command = new CommandContext(false, newScanObj, device.SktScanDevice, null, callback);
             AddCommand(command);
-           
+
         }
         /**
          * PostSetPostamble
-         * 
+         *
          * Configure the postamble of the device
          * @param device
          * @param suffix
@@ -1067,7 +1083,7 @@ namespace ScanApiHelper
         }
         /**
          * PostSetTimersDevice
-         * 
+         *
          * Configure the timers of the device
          * @param device
          * @param suffix
@@ -1085,7 +1101,7 @@ namespace ScanApiHelper
         }
         /**
          * PostGetDataStore
-         * 
+         *
          * Configure the timers of the device
          * @param device
          * @param suffix
@@ -1106,10 +1122,10 @@ namespace ScanApiHelper
 
         /**
          * PostScanApiAbort
-         * 
+         *
          * Request ScanAPI to shutdown. If there is some devices connected
          * we will receive Remove event for each of them, and once all the
-         * outstanding devices are closed, then ScanAPI will send a 
+         * outstanding devices are closed, then ScanAPI will send a
          * Terminate event upon which we can close this application.
          * If the ScanAPI Abort command failed, then the callback will
          * close ScanAPI
@@ -1177,7 +1193,7 @@ namespace ScanApiHelper
         /**
          * HandleDeviceArrival
          * This method is called each time a device connect to the host.
-         * 
+         *
          * We create a device info object to hold all the necessary
          * information about this device, including its interface
          * which is used as handle
@@ -1221,7 +1237,7 @@ namespace ScanApiHelper
 					    break;
 				    }
 			    }
-    			
+
 			    // let's notify whatever UI we might have
 			    if(deviceFound!=null)
 			    {
@@ -1240,7 +1256,7 @@ namespace ScanApiHelper
 
         /**
          * HandleEvent
-         * 
+         *
          * This method handles asynchronous events coming from ScanAPI
          * including decoded data
          */
@@ -1262,6 +1278,7 @@ namespace ScanApiHelper
 			    if(_notification!=null){
 				    _notification.OnDecodedData(deviceInfo,decodedData);
 			    }
+
 			    break;
 		    case ISktScanEvent.id.kSktScanEventPower:
 			    break;
@@ -1275,10 +1292,10 @@ namespace ScanApiHelper
          * "Get Complete" events arrive asynchonously via code in the timer handler of the Scanner List dialog. Even
          * though they may arrive asynchonously, they only arrive as the result of a successful corresponding "Get"
          * request.
-         * 
+         *
          * This function examines the get complete event given in the pScanObj arg, and dispatches it to the correct
          * handler depending on the Property ID it contains.
-         * 
+         *
          * Each property handler must return ESKT_NOERROR if it has successfully performed its processing.
          */
         private long DoGetOrSetComplete(ISktScanObject scanObj)
@@ -1303,10 +1320,10 @@ namespace ScanApiHelper
 						    result=SktScanErrors.ESKT_NOERROR;
 					    }
 				    }
-    				
+
 				    if(doCallback)
 					    command.DoCallback(result,scanObj);
-    				
+
 				    if(remove)
 				    {
 					    lock(_commandContexts){
@@ -1330,7 +1347,7 @@ namespace ScanApiHelper
         /**
          * sendNextCommand
          * This method checks if there is a command ready to be
-         * sent at the top of the list. 
+         * sent at the top of the list.
          */
         private long SendNextCommand()
         {

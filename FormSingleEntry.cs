@@ -36,6 +36,8 @@ namespace SingleEntry
         public delegate void DecodedDataOutputDelegate(string strDecodedData);
         public delegate void StandardTextOutputDelegate(string strStatus);
 
+        // This is for the Host Acknowledgment feature. These lines can
+        // be safely removed from your application if this feature is not needed
 #if HOSTACK
 		private bool bDoGoodScan = true;	// used to alternate between a 'good' ack and a 'bad' ack for demo
 #endif				
@@ -45,8 +47,13 @@ namespace SingleEntry
             lblStatus.Text = "Initializing...";
             _scanApiHelper = new ScanApiHelper.ScanApiHelper();
             _scanApiHelper.SetNotification(this);
+// This is for the Host Acknowledgment feature. These lines can
+// be safely removed from #if to the #endif from your application 
+// if this feature is not needed
 #if HOSTACK
             _scanApiHelper.PostSetConfirmationMode((char)ScanAPI.ISktScanProperty.values.confirmationMode.kSktScanDataConfirmationModeApp, null);
+#else
+            _scanApiHelper.PostSetConfirmationMode((char)ScanAPI.ISktScanProperty.values.confirmationMode.kSktScanDataConfirmationModeDevice, null);
 #endif
         }
 
@@ -76,11 +83,22 @@ namespace SingleEntry
             {
                 UpdateStatusText("New Scanner: " + newDevice.Name);
                 _device = newDevice;
+// This is for the Host Acknowledgment feature. These lines can
+// be safely removed from #if to the #endif from your application 
+// if this feature is not needed
 #if HOSTACK
                 // Set the device to NOT acknowledge itself
                 _scanApiHelper.PostSetLocalAcknowledgement(_device, false, null);
                 // And make sure it does not give any indication after a scan
                 _scanApiHelper.PostSetDecodeAction(_device, ISktScanProperty.values.localDecodeAction.kSktScanLocalDecodeActionNone, null);
+#else
+                // Set the device to NOT acknowledge itself
+                _scanApiHelper.PostSetLocalAcknowledgement(_device, true, null);
+                // And make sure it does not give any indication after a scan
+                int decode = ISktScanProperty.values.localDecodeAction.kSktScanLocalDecodeActionBeep |
+                    ISktScanProperty.values.localDecodeAction.kSktScanLocalDecodeActionFlash |
+                    ISktScanProperty.values.localDecodeAction.kSktScanLocalDecodeActionRumble;
+                _scanApiHelper.PostSetDecodeAction(_device, decode, null);
 #endif
             }
             else
@@ -109,6 +127,9 @@ namespace SingleEntry
         public void OnDecodedData(ScanApiHelper.DeviceInfo device, ISktScanDecodedData decodedData)
         {
             UpdateDecodedDataText(decodedData.DataToUTF8String);
+// This is for the Host Acknowledgment feature. These lines can
+// be safely removed from #if to the #endif from your application 
+// if this feature is not needed
 #if HOSTACK
             Thread.Sleep(3 * 1000); // just a delay to show the trigger lock...
 			// Send confirmation to scanner, good or bad
